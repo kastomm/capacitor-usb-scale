@@ -1,5 +1,5 @@
 import { SplashScreen } from '@capacitor/splash-screen';
-import { Camera } from '@capacitor/camera';
+import { USBScale } from '@kduma-sunmi/capacitor-usb-scale';
 
 window.customElements.define(
   'capacitor-welcome',
@@ -57,33 +57,18 @@ window.customElements.define(
     </style>
     <div>
       <capacitor-welcome-titlebar>
-        <h1>Capacitor</h1>
+        <h1>@kduma-sunmi/capacitor-usb-scale</h1>
       </capacitor-welcome-titlebar>
       <main>
+        <h1>Weight: <span id="weight">- g</span></h1>
         <p>
-          Capacitor makes it easy to build powerful apps for the app stores, mobile web (Progressive Web Apps), and desktop, all
-          with a single code base.
+          <button class="button" id="enumerate">enumerateDevices()</button>
+          <button class="button" id="request">requestPermission()</button>
+          <button class="button" id="open">open()</button>
+          <button class="button" id="stop">stop()</button>
         </p>
-        <h2>Getting Started</h2>
-        <p>
-          You'll probably need a UI framework to build a full-featured app. Might we recommend
-          <a target="_blank" href="http://ionicframework.com/">Ionic</a>?
-        </p>
-        <p>
-          Visit <a href="https://capacitorjs.com">capacitorjs.com</a> for information
-          on using native features, building plugins, and more.
-        </p>
-        <a href="https://capacitorjs.com" target="_blank" class="button">Read more</a>
-        <h2>Tiny Demo</h2>
-        <p>
-          This demo shows how to call Capacitor plugins. Say cheese!
-        </p>
-        <p>
-          <button class="button" id="take-photo">Take Photo</button>
-        </p>
-        <p>
-          <img id="image" style="max-width: 100%">
-        </p>
+        <h2>Demo Events</h2>
+        <p id="output"></p>
       </main>
     </div>
     `;
@@ -92,22 +77,83 @@ window.customElements.define(
     connectedCallback() {
       const self = this;
 
-      self.shadowRoot.querySelector('#take-photo').addEventListener('click', async function (e) {
+      self.shadowRoot.querySelector('#enumerate').addEventListener('click', async function (e) {
+        const output = self.shadowRoot.querySelector('#output');
+
+        const devices = await USBScale.enumerateDevices();
+
+        output.innerHTML = "<b>enumerateDevices():</b><br><pre><code>" + JSON.stringify(devices, null, 3) + "</code></pre><hr>" + output.innerHTML;
+
+
+      });
+
+      self.shadowRoot.querySelector('#request').addEventListener('click', async function (e) {
+        const output = self.shadowRoot.querySelector('#output');
+
         try {
-          const photo = await Camera.getPhoto({
-            resultType: 'uri',
-          });
-
-          const image = self.shadowRoot.querySelector('#image');
-          if (!image) {
-            return;
-          }
-
-          image.src = photo.webPath;
-        } catch (e) {
-          console.warn('User cancelled', e);
+          const request = await USBScale.requestPermission();
+          output.innerHTML = "<b>requestPermission():</b><br><pre><code>" + JSON.stringify(request, null, 3) + "</code></pre><hr>" + output.innerHTML;
+        } catch (err) {
+          output.innerHTML = "<b>requestPermission() - EXCEPTION!:</b><br><pre><code>" + err.message + "</code></pre><hr>" + output.innerHTML;
         }
       });
+
+      self.shadowRoot.querySelector('#open').addEventListener('click', async function (e) {
+        const output = self.shadowRoot.querySelector('#output');
+        self.shadowRoot.querySelector('#weight').innerHTML = "- g";
+
+        try {
+          const request = await USBScale.open();
+          output.innerHTML = "<b>open():</b><br><pre><code>" + JSON.stringify(request, null, 3) + "</code></pre><hr>" + output.innerHTML;
+        } catch (err) {
+          output.innerHTML = "<b>open() - EXCEPTION!:</b><br><pre><code>" + err.message + "</code></pre><hr>" + output.innerHTML;
+        }
+      });
+
+      self.shadowRoot.querySelector('#stop').addEventListener('click', async function (e) {
+        const output = self.shadowRoot.querySelector('#output');
+        self.shadowRoot.querySelector('#weight').innerHTML = "- g";
+
+        try {
+          const request = await USBScale.stop();
+          output.innerHTML = "<b>stop():</b><br><pre><code>" + JSON.stringify(request, null, 3) + "</code></pre><hr>" + output.innerHTML;
+        } catch (err) {
+          output.innerHTML = "<b>stop() - EXCEPTION!:</b><br><pre><code>" + err.message + "</code></pre><hr>" + output.innerHTML;
+        }
+      });
+
+      window.addEventListener('usb_scale_read', (e) => {
+        const output = self.shadowRoot.querySelector('#output');
+        output.innerHTML = "<b>usb_scale_read:</b><br><pre>" + JSON.stringify(e, null, 3) + "</pre><hr>" + output.innerHTML;
+
+        if (e.status != "Zero" && e.status != "InMotion" && e.status != "Stable") {
+          self.shadowRoot.querySelector('#weight').innerHTML = "~ g";
+        } else if(e.weight < 1000) {
+          self.shadowRoot.querySelector('#weight').innerHTML = e.weight + " g";
+        } else {
+          self.shadowRoot.querySelector('#weight').innerHTML = e.weight/1000 + " kg";
+        }
+
+        console.log(e);
+      }, false);
+
+      window.addEventListener('usb_scale_disconnected', (e) => {
+        const output = self.shadowRoot.querySelector('#output');
+        output.innerHTML = "<b>usb_scale_disconnected:</b><br><pre>" + JSON.stringify(e, null, 3) + "</pre><hr>" + output.innerHTML;
+
+        self.shadowRoot.querySelector('#weight').innerHTML = "- g";
+
+        console.log(e);
+      }, false);
+
+      window.addEventListener('usb_scale_connected', async (e) => {
+        const output = self.shadowRoot.querySelector('#output');
+        output.innerHTML = "<b>usb_scale_connected:</b><br><pre>" + JSON.stringify(e, null, 3) + "</pre><hr>" + output.innerHTML;
+
+        const request = await USBScale.open();
+
+        console.log(e);
+      }, false);
     }
   }
 );
