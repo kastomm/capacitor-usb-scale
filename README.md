@@ -13,24 +13,60 @@ npx cap sync
 
 <docgen-index>
 
-* [`echo(...)`](#echo)
+* [`enumerateDevices()`](#enumeratedevices)
+* [`requestPermission(...)`](#requestpermission)
+* [`open(...)`](#open)
+* [`stop()`](#stop)
 
 </docgen-index>
 
 <docgen-api>
 <!--Update the source file JSDoc comments and rerun docgen to update the docs below-->
 
-### echo(...)
+### enumerateDevices()
 
 ```typescript
-echo(options: { value: string; }) => Promise<{ value: string; }>
+enumerateDevices() => Promise<{ devices: { id: string; vid: number; pid: number; serial?: string; product: { manufacturer: string; name: string; }; }[]; }>
 ```
 
-| Param         | Type                            |
-| ------------- | ------------------------------- |
-| **`options`** | <code>{ value: string; }</code> |
+**Returns:** <code>Promise&lt;{ devices: { id: string; vid: number; pid: number; serial?: string; product: { manufacturer: string; name: string; }; }[]; }&gt;</code>
 
-**Returns:** <code>Promise&lt;{ value: string; }&gt;</code>
+--------------------
+
+
+### requestPermission(...)
+
+```typescript
+requestPermission(device?: string | undefined) => Promise<{ status: boolean; }>
+```
+
+| Param        | Type                |
+| ------------ | ------------------- |
+| **`device`** | <code>string</code> |
+
+**Returns:** <code>Promise&lt;{ status: boolean; }&gt;</code>
+
+--------------------
+
+
+### open(...)
+
+```typescript
+open(device?: string | undefined) => Promise<void>
+```
+
+| Param        | Type                |
+| ------------ | ------------------- |
+| **`device`** | <code>string</code> |
+
+--------------------
+
+
+### stop()
+
+```typescript
+stop() => Promise<void>
+```
 
 --------------------
 
