@@ -129,7 +129,7 @@ public class USBScalePlugin extends Plugin {
         });
     }
 
-    @PluginMethod(returnType = PluginMethod.RETURN_NONE)
+    @PluginMethod
     public void open(PluginCall call) throws JSONException {
         String device = call.getString("device");
 
@@ -149,6 +149,7 @@ public class USBScalePlugin extends Plugin {
         this.execute(() -> {
             try {
                 implementation.open(finalDevice);
+                call.resolve();
             } catch (IOException e) {
                 call.reject(e.getMessage(), e);
             }
