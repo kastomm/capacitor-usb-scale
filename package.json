@@ -17,9 +17,6 @@
     "type": "git",
     "url": "git+https://github.com/kduma-autoid/capacitor-usb-scale.git"
   },
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
-  },
   "bugs": {
     "url": "https://github.com/kduma-autoid/capacitor-usb-scale/issues"
   },
