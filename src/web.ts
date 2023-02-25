@@ -1,6 +1,6 @@
 import { WebPlugin } from '@capacitor/core';
 
-import type { USBScalePlugin } from './definitions';
+import type { CallbackID, USBScalePlugin } from './definitions';
 
 export class USBScaleWeb extends WebPlugin implements USBScalePlugin {
   enumerateDevices(): Promise<{ devices: { id: string; vid: number; pid: number; serial?: string; product: { manufacturer: string; name: string } }[] }> {
@@ -16,6 +16,14 @@ export class USBScaleWeb extends WebPlugin implements USBScalePlugin {
   }
 
   stop(): Promise<void> {
+    throw this.unimplemented('Not implemented on web.');
+  }
+
+  clearIncomingWeightDataCallback(): Promise<void> {
+    throw this.unimplemented('Not implemented on web.');
+  }
+
+  setIncomingWeightDataCallback(): Promise<CallbackID> {
     throw this.unimplemented('Not implemented on web.');
   }
 }

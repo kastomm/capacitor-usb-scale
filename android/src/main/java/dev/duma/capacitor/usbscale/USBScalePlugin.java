@@ -2,6 +2,9 @@ package dev.duma.capacitor.usbscale;
 
 import android.hardware.usb.UsbDevice;
 
+import androidx.annotation.Nullable;
+
+import com.getcapacitor.Bridge;
 import com.getcapacitor.JSObject;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
@@ -23,6 +26,8 @@ public class USBScalePlugin extends Plugin {
     AtomicReference<Double> lastWeight = new AtomicReference<>((double) 0);
     AtomicReference<String> lastStatus = new AtomicReference<>("");
 
+    private String incomingWeightDataCallbackId;
+
     @Override
     public void load() {
         super.load();
@@ -34,11 +39,17 @@ public class USBScalePlugin extends Plugin {
             lastWeight.set(weight);
 
             try {
-                JSONObject json = new JSONObject();
-                json.put("data", data);
-                json.put("weight", weight);
-                json.put("status", status);
-                this.getBridge().triggerWindowJSEvent("usb_scale_read", json.toString(3));
+                JSObject ret = new JSObject();
+                ret.put("data", data);
+                ret.put("weight", weight);
+                ret.put("status", status);
+
+                PluginCall call = getIncomingWeightDataCallback();
+                if (call != null) {
+                    call.resolve(ret);
+                } else {
+                    bridge.triggerWindowJSEvent("usb_scale_read", ret.toString(3));
+                }
             } catch (JSONException e) {
                 throw new RuntimeException(e);
             }
@@ -156,8 +167,42 @@ public class USBScalePlugin extends Plugin {
         });
     }
 
-    @PluginMethod(returnType = PluginMethod.RETURN_NONE)
+    @PluginMethod()
     public void stop(PluginCall call) throws JSONException {
         implementation.stop();
+        call.resolve();
+    }
+
+    @Nullable
+    protected PluginCall getIncomingWeightDataCallback() {
+        if(incomingWeightDataCallbackId == null) {
+            return null;
+        }
+
+        return bridge.getSavedCall(incomingWeightDataCallbackId);
+    }
+
+    @PluginMethod(returnType = PluginMethod.RETURN_CALLBACK)
+    public void setIncomingWeightDataCallback(PluginCall call) {
+        if(incomingWeightDataCallbackId != null) {
+            bridge.releaseCall(incomingWeightDataCallbackId);
+            incomingWeightDataCallbackId = null;
+        }
+
+        call.setKeepAlive(true);
+        incomingWeightDataCallbackId = call.getCallbackId();
+        bridge.saveCall(call);
+    }
+
+    @PluginMethod()
+    public void clearIncomingWeightDataCallback(PluginCall call) {
+        if(incomingWeightDataCallbackId == null) {
+            return;
+        }
+
+        bridge.releaseCall(incomingWeightDataCallbackId);
+        incomingWeightDataCallbackId = null;
+
+        call.resolve();
     }
 }

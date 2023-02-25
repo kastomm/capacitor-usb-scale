@@ -20,7 +20,11 @@ import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.getcapacitor.Bridge;
+import com.getcapacitor.PluginCall;
 
 import dev.duma.capacitor.usbscale.UsbPermissionsBroadcastReceiver.UsbPermissionsBroadcastReceiverCallback;
 
@@ -207,6 +211,7 @@ public class USBScale {
                                 break;
                             case 11: // Ounces
                                 weight *= 28.34952;
+                                weight = Math.round(weight * 100.0) / 100.0;
                                 break;
                         }
 
