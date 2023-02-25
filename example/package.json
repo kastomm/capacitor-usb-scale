@@ -16,7 +16,7 @@
     "@capacitor/core": "latest",
     "@capacitor/camera": "latest",
     "@capacitor/splash-screen": "latest",
-    "@kduma-sunmi/capacitor-usb-scale": "file:..",
+    "@kduma-autoid/capacitor-usb-scale": "file:..",
     "@capacitor/android": "^4.0.0"
   },
   "devDependencies": {

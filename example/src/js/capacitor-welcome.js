@@ -1,5 +1,5 @@
 import { SplashScreen } from '@capacitor/splash-screen';
-import { USBScale } from '@kduma-sunmi/capacitor-usb-scale';
+import { USBScale } from '@kduma-autoid/capacitor-usb-scale';
 
 window.customElements.define(
   'capacitor-welcome',
@@ -57,7 +57,7 @@ window.customElements.define(
     </style>
     <div>
       <capacitor-welcome-titlebar>
-        <h1>@kduma-sunmi/capacitor-usb-scale</h1>
+        <h1>@kduma-autoid/capacitor-usb-scale</h1>
       </capacitor-welcome-titlebar>
       <main>
         <h1>Weight: <span id="weight">- g</span></h1>

@@ -1,5 +1,5 @@
 {
-  "name": "@kduma-sunmi/capacitor-usb-scale",
+  "name": "@kduma-autoid/capacitor-usb-scale",
   "version": "0.0.1",
   "description": "Capacitor adapter for cheap USB scales like Dymo M10",
   "main": "dist/plugin.cjs.js",
@@ -15,18 +15,21 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kduma-sunmi/capacitor-usb-scale.git"
+    "url": "git+https://github.com/kduma-autoid/capacitor-usb-scale.git"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
   },
   "bugs": {
-    "url": "https://github.com/kduma-sunmi/capacitor-usb-scale/issues"
+    "url": "https://github.com/kduma-autoid/capacitor-usb-scale/issues"
   },
   "keywords": [
     "capacitor",
     "plugin",
-    "native"
+    "native",
+    "usb",
+    "scale",
+    "dymo"
   ],
   "scripts": {
     "verify": "npm run verify:ios && npm run verify:android && npm run verify:web",

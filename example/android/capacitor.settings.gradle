@@ -8,5 +8,5 @@ project(':capacitor-camera').projectDir = new File('../node_modules/@capacitor/c
 include ':capacitor-splash-screen'
 project(':capacitor-splash-screen').projectDir = new File('../node_modules/@capacitor/splash-screen/android')
 
-include ':kduma-sunmi-capacitor-usb-scale'
-project(':kduma-sunmi-capacitor-usb-scale').projectDir = new File('../node_modules/@kduma-sunmi/capacitor-usb-scale/android')
+include ':kduma-autoid-capacitor-usb-scale'
+project(':kduma-autoid-capacitor-usb-scale').projectDir = new File('../node_modules/@kduma-autoid/capacitor-usb-scale/android')
