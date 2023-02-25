@@ -32,6 +32,8 @@ npx cap sync
 enumerateDevices() => Promise<{ devices: USBDevice[]; }>
 ```
 
+Get a list of all connected compatible USB scale devices
+
 **Returns:** <code>Promise&lt;{ devices: USBDevice[]; }&gt;</code>
 
 --------------------
@@ -43,9 +45,11 @@ enumerateDevices() => Promise<{ devices: USBDevice[]; }>
 requestPermission(device?: string | undefined) => Promise<{ status: boolean; }>
 ```
 
-| Param        | Type                |
-| ------------ | ------------------- |
-| **`device`** | <code>string</code> |
+Request permission to access the USB scale device
+
+| Param        | Type                | Description                                                                            |
+| ------------ | ------------------- | -------------------------------------------------------------------------------------- |
+| **`device`** | <code>string</code> | The device to request permission for. If not specified, the first device will be used. |
 
 **Returns:** <code>Promise&lt;{ status: boolean; }&gt;</code>
 
@@ -58,9 +62,11 @@ requestPermission(device?: string | undefined) => Promise<{ status: boolean; }>
 open(device?: string | undefined) => Promise<void>
 ```
 
-| Param        | Type                |
-| ------------ | ------------------- |
-| **`device`** | <code>string</code> |
+Open the USB scale device for data reading
+
+| Param        | Type                | Description                                                          |
+| ------------ | ------------------- | -------------------------------------------------------------------- |
+| **`device`** | <code>string</code> | The device to open. If not specified, the first device will be used. |
 
 --------------------
 
@@ -71,6 +77,8 @@ open(device?: string | undefined) => Promise<void>
 stop() => Promise<void>
 ```
 
+Close the USB scale device
+
 --------------------
 
 
@@ -80,9 +88,12 @@ stop() => Promise<void>
 setIncomingWeightDataCallback(callback: (data: ScaleRead) => void) => Promise<CallbackID>
 ```
 
-| Param          | Type                                                               |
-| -------------- | ------------------------------------------------------------------ |
-| **`callback`** | <code>(data: <a href="#scaleread">ScaleRead</a>) =&gt; void</code> |
+Sets a callback to be called when the scale sends data.
+If callback is not set, there will bi raised an `usb_scale_read` event.
+
+| Param          | Type                                                               | Description                                          |
+| -------------- | ------------------------------------------------------------------ | ---------------------------------------------------- |
+| **`callback`** | <code>(data: <a href="#scaleread">ScaleRead</a>) =&gt; void</code> | The callback to be called when the scale sends data. |
 
 **Returns:** <code>Promise&lt;string&gt;</code>
 
@@ -94,6 +105,8 @@ setIncomingWeightDataCallback(callback: (data: ScaleRead) => void) => Promise<Ca
 ```typescript
 clearIncomingWeightDataCallback() => Promise<void>
 ```
+
+Clears the callback set by `setIncomingWeightDataCallback`.
 
 --------------------
 
@@ -121,3 +134,29 @@ clearIncomingWeightDataCallback() => Promise<void>
 <code>string</code>
 
 </docgen-api>
+
+### Events
+
+#### usb_scale_read
+
+```typescript
+addEventListener(type: "usb_scale_read", listener: (ev: ScaleRead) => any, useCapture?: boolean): void;
+```
+
+Emitted when the scale sends data, and there is no callback set by `setIncomingWeightDataCallback`.
+
+#### usb_scale_connected
+
+```typescript
+addEventListener(type: "usb_scale_connected", listener: (ev: { device: USBDevice }) => any, useCapture?: boolean): void;
+```
+
+Emitted when a compatible USB scale device is connected.
+
+#### usb_scale_disconnected
+
+```typescript
+addEventListener(type: "usb_scale_disconnected", listener: (ev: { device: USBDevice }) => any, useCapture?: boolean): void;
+```
+
+Emitted when a compatible USB scale device is disconnected.
