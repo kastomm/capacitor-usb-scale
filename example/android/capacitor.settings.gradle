@@ -9,4 +9,4 @@ include ':capacitor-splash-screen'
 project(':capacitor-splash-screen').projectDir = new File('../node_modules/@capacitor/splash-screen/android')
 
 include ':kduma-autoid-capacitor-usb-scale'
-project(':kduma-autoid-capacitor-usb-scale').projectDir = new File('../node_modules/@kduma-autoid/capacitor-usb-scale/android')
+project(':kduma-autoid-capacitor-usb-scale').projectDir = new File('../../android')
