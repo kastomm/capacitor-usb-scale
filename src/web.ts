@@ -18,7 +18,7 @@ export class USBScaleWeb extends WebPlugin implements USBScalePlugin {
     throw this.unimplemented('Not implemented on web.');
   }
 
-  stop(): Promise<void> {
+  close(): Promise<void> {
     throw this.unimplemented('Not implemented on web.');
   }
 }

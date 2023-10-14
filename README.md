@@ -16,7 +16,7 @@ npx cap sync
 * [`enumerateDevices()`](#enumeratedevices)
 * [`requestPermission(...)`](#requestpermission)
 * [`open(...)`](#open)
-* [`stop()`](#stop)
+* [`close()`](#close)
 * [`addListener('onRead', ...)`](#addlisteneronread)
 * [`addListener('onScaleConnected', ...)`](#addlisteneronscaleconnected)
 * [`addListener('onScaleDisconnected', ...)`](#addlisteneronscaledisconnected)
@@ -76,10 +76,10 @@ Throws an error if the device is not connected or permission is denied
 --------------------
 
 
-### stop()
+### close()
 
 ```typescript
-stop() => Promise<void>
+close() => Promise<void>
 ```
 
 Close the USB scale device

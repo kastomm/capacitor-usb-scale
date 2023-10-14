@@ -70,7 +70,7 @@ window.customElements.define(
           <button class="button" id="enumerate">enumerateDevices()</button>
           <button class="button" id="request">requestPermission()</button>
           <button class="button" id="open">open()</button>
-          <button class="button" id="stop">stop()</button>
+          <button class="button" id="close">close()</button>
         </p>
         <h2>Demo Events</h2>
         <p id="output"></p>
@@ -113,15 +113,15 @@ window.customElements.define(
         }
       });
 
-      self.shadowRoot.querySelector('#stop').addEventListener('click', async function (e) {
+      self.shadowRoot.querySelector('#close').addEventListener('click', async function (e) {
         const output = self.shadowRoot.querySelector('#output');
         self.shadowRoot.querySelector('#weight').innerHTML = "- g";
 
         try {
-          const request = await USBScale.stop();
-          output.innerHTML = "<b>stop():</b><br><pre><code>" + JSON.stringify(request, null, 3) + "</code></pre><hr>" + output.innerHTML;
+          const request = await USBScale.close();
+          output.innerHTML = "<b>close():</b><br><pre><code>" + JSON.stringify(request, null, 3) + "</code></pre><hr>" + output.innerHTML;
         } catch (err) {
-          output.innerHTML = "<b>stop() - EXCEPTION!:</b><br><pre><code>" + err.message + "</code></pre><hr>" + output.innerHTML;
+          output.innerHTML = "<b>close() - EXCEPTION!:</b><br><pre><code>" + err.message + "</code></pre><hr>" + output.innerHTML;
         }
       });
 

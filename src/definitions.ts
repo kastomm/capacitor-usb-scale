@@ -77,7 +77,7 @@ export interface USBScalePlugin {
   /**
    * Close the USB scale device
    */
-  stop(): Promise<void>;
+  close(): Promise<void>;
 
   /**
    * Event emitted when the scale sends data

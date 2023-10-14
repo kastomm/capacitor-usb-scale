@@ -2,7 +2,6 @@ package dev.duma.capacitor.usbscale;
 
 import java.util.ArrayList;
 
-import android.annotation.SuppressLint;
 import android.hardware.usb.UsbDevice;
 
 import androidx.annotation.NonNull;
@@ -69,7 +68,7 @@ public class USBScale {
         broadcastReceiver.setCurrentlyOpenedDevice(usbDevice);
     }
 
-    public void stop() {
+    public void close() {
         usbScale.close();
         broadcastReceiver.setCurrentlyOpenedDevice(null);
     }

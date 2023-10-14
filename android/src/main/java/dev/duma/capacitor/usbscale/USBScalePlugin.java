@@ -86,7 +86,7 @@ public class USBScalePlugin extends Plugin {
 
             notifyListeners("onScaleDisconnected", response);
 
-            implementation.stop();
+            implementation.close();
         }
     };
 
@@ -95,22 +95,6 @@ public class USBScalePlugin extends Plugin {
         implementation = new USBScale(this.getActivity(), callback);
         implementation.register();
     }
-
-//    private boolean hasPausedEver = false;
-//
-//    @Override
-//    protected void handleOnPause() {
-//        hasPausedEver = true;
-//
-//    }
-//
-//    @Override
-//    protected void handleOnResume() {
-//        if (!hasPausedEver) {
-//            return;
-//        }
-//
-//    }
 
     @PluginMethod
     public void enumerateDevices(PluginCall call) throws JSONException {
@@ -183,8 +167,8 @@ public class USBScalePlugin extends Plugin {
     }
 
     @PluginMethod()
-    public void stop(PluginCall call) {
-        implementation.stop();
+    public void close(PluginCall call) {
+        implementation.close();
         call.resolve();
     }
 
