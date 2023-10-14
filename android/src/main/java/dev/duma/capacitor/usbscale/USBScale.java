@@ -14,7 +14,7 @@ import dev.duma.android.usbscale.broadcastreceiver.IUSBScaleBroadcastReceiver;
 import dev.duma.android.usbscale.exceptions.CantOpenDeviceException;
 import dev.duma.android.usbscale.exceptions.DeviceNotFoundException;
 import dev.duma.android.usbscale.exceptions.OpenedDeviceEndpointIsNotInputEndpoint;
-import dev.duma.capacitor.usbscale.UsbPermissionsBroadcastReceiver.Callback;
+import dev.duma.android.usbscale.UsbPermissionsBroadcastReceiver.Callback;
 
 
 public class USBScale {
@@ -60,7 +60,6 @@ public class USBScale {
         return usbScale.enumerateDevices();
     }
 
-    @SuppressLint("UnspecifiedRegisterReceiverFlag")
     public void requestPermission(String device, Callback callback) throws DeviceNotFoundException {
         usbScale.requestPermission(device, callback);
     }

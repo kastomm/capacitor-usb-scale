@@ -1,4 +1,4 @@
-package dev.duma.capacitor.usbscale;
+package dev.duma.android.usbscale;
 
 import android.annotation.SuppressLint;
 import android.app.PendingIntent;

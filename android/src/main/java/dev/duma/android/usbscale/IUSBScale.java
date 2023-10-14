@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import dev.duma.android.usbscale.exceptions.CantOpenDeviceException;
 import dev.duma.android.usbscale.exceptions.DeviceNotFoundException;
 import dev.duma.android.usbscale.exceptions.OpenedDeviceEndpointIsNotInputEndpoint;
-import dev.duma.capacitor.usbscale.UsbPermissionsBroadcastReceiver;
 
 public interface IUSBScale {
     @NonNull
