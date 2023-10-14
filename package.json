@@ -1,6 +1,6 @@
 {
   "name": "@kduma-autoid/capacitor-usb-scale",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Capacitor adapter for cheap USB scales like Dymo M10",
   "main": "dist/plugin.cjs.js",
   "module": "dist/esm/index.js",
