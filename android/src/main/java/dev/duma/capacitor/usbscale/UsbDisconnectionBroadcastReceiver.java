@@ -10,11 +10,11 @@ import android.hardware.usb.UsbManager;
 import org.json.JSONObject;
 
 public class UsbDisconnectionBroadcastReceiver extends BroadcastReceiver {
-    private final UsbDisconnectedBroadcastReceiverCallback callback;
+    private final IUSBScaleCallback callback;
     private final Activity activity;
     private UsbDevice usedDevice;
 
-    public UsbDisconnectionBroadcastReceiver(UsbDisconnectedBroadcastReceiverCallback callback, Activity activity, UsbDevice usedDevice) {
+    public UsbDisconnectionBroadcastReceiver(IUSBScaleCallback callback, Activity activity, UsbDevice usedDevice) {
         this.callback = callback;
         this.activity = activity;
         this.usedDevice = usedDevice;
@@ -29,7 +29,7 @@ public class UsbDisconnectionBroadcastReceiver extends BroadcastReceiver {
                 return;
             }
 
-            callback.run(device);
+            callback.OnScaleDisconnected(device);
             unregister();
         }
     }
@@ -41,9 +41,5 @@ public class UsbDisconnectionBroadcastReceiver extends BroadcastReceiver {
 
         activity.unregisterReceiver(this);
         registered = false;
-    }
-
-    public interface UsbDisconnectedBroadcastReceiverCallback {
-        void run(UsbDevice device);
     }
 }

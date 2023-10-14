@@ -20,38 +20,27 @@ import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.util.Log;
 
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-
-import com.getcapacitor.Bridge;
-import com.getcapacitor.PluginCall;
 
 import dev.duma.capacitor.usbscale.UsbPermissionsBroadcastReceiver.UsbPermissionsBroadcastReceiverCallback;
 
 
 public class USBScale {
     private UsbManager manager;
-    private DataReceiveCallback callback;
-    private DeviceDisconnectedCallback disconnectedCallback;
-    private DeviceConnectedCallback connectedCallback;
+    private IUSBScaleCallback callback;
     private AppCompatActivity activity;
 
-    public USBScale(
-            AppCompatActivity activity,
-            DataReceiveCallback callback,
-            DeviceDisconnectedCallback disconnectedCallback,
-            DeviceConnectedCallback connectedCallback) {
+    public USBScale(AppCompatActivity activity, IUSBScaleCallback callback) {
         this.activity = activity;
         this.manager = (UsbManager) activity.getSystemService(Context.USB_SERVICE);
 
         this.callback = callback;
-        this.disconnectedCallback = disconnectedCallback;
-        this.connectedCallback = connectedCallback;
 
         IntentFilter filter = new IntentFilter(UsbManager.ACTION_USB_DEVICE_ATTACHED);
-        UsbConnectionBroadcastReceiver usbConnectReceiver = new UsbConnectionBroadcastReceiver(connectedCallback::run);
+        UsbConnectionBroadcastReceiver usbConnectReceiver = new UsbConnectionBroadcastReceiver(callback);
         activity.registerReceiver(usbConnectReceiver, filter);
     }
+
     private PendingIntent mPermissionIntent;
 
 
@@ -61,7 +50,7 @@ public class USBScale {
     private boolean forceClaim = true;
 
     private UsbDeviceConnection connection;
-    private UsbInterface intf;
+    private UsbInterface usbInterface;
     UsbDisconnectionBroadcastReceiver usbDisconnectReceiver;
     private USBThreadDataReceiver usbThreadDataReceiver;
     private UsbEndpoint endPointRead;
@@ -114,38 +103,36 @@ public class USBScale {
 
     public void open(String device) throws IOException {
         UsbDevice d = manager.getDeviceList().get(device);
+
         if (d == null) {
             throw new IOException(String.format("Unknown Device: %s", device));
         }
-        UsbDeviceConnection c = manager.openDevice(d);
-        if (c != null) {
-            if (connection != null) {
-                throw new IOException("Already open");
-            }
-            connection = c;
-            usedDevice = d;
-            this.intf = d.getInterface(0);
-            UsbEndpoint endpoint = intf.getEndpoint(0);
-            connection.claimInterface(intf, forceClaim);
-            try {
-                if (UsbConstants.USB_DIR_IN == intf.getEndpoint(0).getDirection()) {
-                    endPointRead = intf.getEndpoint(0);
-                    packetSize = endPointRead.getMaxPacketSize();
-                }
-            } catch (Exception e) {
-                throw e;
-            }
 
-            IntentFilter filter = new IntentFilter(UsbManager.ACTION_USB_DEVICE_DETACHED);
-            usbDisconnectReceiver = new UsbDisconnectionBroadcastReceiver((UsbDevice disconnectedDevice) -> {
-                disconnectedCallback.run(disconnectedDevice);
-                this.stop();
-            }, activity, usedDevice);
-            activity.registerReceiver(usbDisconnectReceiver, filter);
-
-            usbThreadDataReceiver = new USBThreadDataReceiver();
-            usbThreadDataReceiver.start();
+        if (connection != null) {
+            throw new IOException("Already open");
         }
+
+        UsbDeviceConnection c = manager.openDevice(d);
+        if (c == null) {
+            throw new IOException("Could not open device, check if user has granted permission to access the device");
+        }
+
+        connection = c;
+        usedDevice = d;
+        this.usbInterface = d.getInterface(0);
+        UsbEndpoint endpoint = usbInterface.getEndpoint(0);
+        connection.claimInterface(usbInterface, forceClaim);
+        if (UsbConstants.USB_DIR_IN == endpoint.getDirection()) {
+            endPointRead = endpoint;
+            packetSize = endPointRead.getMaxPacketSize();
+        }
+
+        IntentFilter filter = new IntentFilter(UsbManager.ACTION_USB_DEVICE_DETACHED);
+        usbDisconnectReceiver = new UsbDisconnectionBroadcastReceiver(callback, activity, usedDevice);
+        activity.registerReceiver(usbDisconnectReceiver, filter);
+
+        usbThreadDataReceiver = new USBThreadDataReceiver();
+        usbThreadDataReceiver.start();
     }
 
     public void stop() {
@@ -153,7 +140,7 @@ public class USBScale {
             return;
 
         usbThreadDataReceiver.stopThis();
-        connection.releaseInterface(intf);
+        connection.releaseInterface(usbInterface);
         connection.close();
         usbDisconnectReceiver.unregister();
         connection = null;
@@ -175,35 +162,18 @@ public class USBScale {
                         if (buffer[0] != 3)
                             continue;
 
-                        String stringStatus;
-                        switch(buffer[1]) {
-                            case 1:
-                                stringStatus = "Fault";
-                                break;
-                            case 2:
-                                stringStatus = "Zero";
-                                break;
-                            case 3:
-                                stringStatus = "InMotion";
-                                break;
-                            case 4:
-                                stringStatus = "Stable";
-                                break;
-                            case 5:
-                                stringStatus = "UnderZero";
-                                break;
-                            case 6:
-                                stringStatus = "OverWeight";
-                                break;
-                            case 7:
-                                stringStatus = "NeedCalibration";
-                                break;
-                            case 8:
-                                stringStatus = "NeedZeroing";
-                                break;
-                            default:
-                                stringStatus = "Unknown";
-                        }
+                        String stringStatus = switch (buffer[1]) {
+                            case 1 -> "Fault";
+                            case 2 -> "Zero";
+                            case 3 -> "InMotion";
+                            case 4 -> "Stable";
+                            case 5 -> "UnderZero";
+                            case 6 -> "OverWeight";
+                            case 7 -> "NeedCalibration";
+                            case 8 -> "NeedZeroing";
+                            default -> "Unknown";
+                        };
+
                         double weight = (Byte.toUnsignedInt(buffer[4]) + Byte.toUnsignedInt(buffer[5]) * 256) * Math.pow(10, buffer[3]);
                         switch (buffer[2])
                         {
@@ -215,7 +185,7 @@ public class USBScale {
                                 break;
                         }
 
-                        callback.run(Arrays.toString(buffer), stringStatus, weight);
+                        callback.OnRead(Arrays.toString(buffer), stringStatus, weight);
                     }
                 }
             } catch (Exception e) {
@@ -226,17 +196,5 @@ public class USBScale {
         public void stopThis() {
             isStopped = true;
         }
-    }
-
-    public interface DataReceiveCallback {
-        public void run(String data, String status, double weight);
-    }
-
-    public interface DeviceConnectedCallback {
-        public void run(UsbDevice device);
-    }
-
-    public interface DeviceDisconnectedCallback {
-        public void run(UsbDevice device);
     }
 }

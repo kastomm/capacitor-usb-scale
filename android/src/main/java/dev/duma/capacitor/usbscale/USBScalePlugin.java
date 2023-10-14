@@ -25,80 +25,89 @@ public class USBScalePlugin extends Plugin {
 
     AtomicReference<Double> lastWeight = new AtomicReference<>((double) 0);
     AtomicReference<String> lastStatus = new AtomicReference<>("");
-
-    private String incomingWeightDataCallbackId;
-
-    @Override
-    public void load() {
-        super.load();
-        implementation = new USBScale(this.getActivity(), (data, status, weight) -> {
+    IUSBScaleCallback callback = new IUSBScaleCallback() {
+        @Override
+        public void OnRead(String data, String status, double weight) {
             if(weight == lastWeight.get() && Objects.equals(status, lastStatus.get()))
                 return;
 
             lastStatus.set(status);
             lastWeight.set(weight);
 
-            try {
-                JSObject ret = new JSObject();
-                ret.put("data", data);
-                ret.put("weight", weight);
-                ret.put("status", status);
+            JSObject ret = new JSObject();
+            ret.put("data", data);
+            ret.put("weight", weight);
+            ret.put("status", status);
 
-                PluginCall call = getIncomingWeightDataCallback();
-                if (call != null) {
-                    call.resolve(ret);
-                } else {
-                    bridge.triggerWindowJSEvent("usb_scale_read", ret.toString(3));
-                }
-            } catch (JSONException e) {
-                throw new RuntimeException(e);
-            }
-        }, (UsbDevice device) -> {
-            try {
-                int vid = device.getVendorId();
-                int pid = device.getProductId();
+            notifyListeners("onRead", ret);
+        }
 
-                JSONObject product = new JSONObject();
-                product.put("manufacturer", device.getManufacturerName());
-                product.put("name", device.getProductName());
+        @Override
+        public void OnScaleConnected(UsbDevice device) {
+            int vid = device.getVendorId();
+            int pid = device.getProductId();
 
-                JSONObject obj = new JSONObject();
-                obj.put("id", device.getDeviceName());
-                obj.put("vid", vid);
-                obj.put("pid", pid);
-                obj.put("serial", device.getSerialNumber());
-                obj.put("product", product);
+            JSObject product = new JSObject();
+            product.put("manufacturer", device.getManufacturerName());
+            product.put("name", device.getProductName());
 
-                JSONObject json = new JSONObject();
-                json.put("device", obj);
-                this.getBridge().triggerWindowJSEvent("usb_scale_disconnected", json.toString(3));
-            } catch (JSONException e) {
-                throw new RuntimeException(e);
-            }
-        }, (UsbDevice device) -> {
-            try {
-                int vid = device.getVendorId();
-                int pid = device.getProductId();
+            JSObject dev = new JSObject();
+            dev.put("id", device.getDeviceName());
+            dev.put("vid", vid);
+            dev.put("pid", pid);
+            dev.put("serial", device.getSerialNumber());
+            dev.put("product", product);
 
-                JSONObject product = new JSONObject();
-                product.put("manufacturer", device.getManufacturerName());
-                product.put("name", device.getProductName());
+            JSObject response = new JSObject();
+            response.put("device", dev);
+            notifyListeners("onScaleConnected", response);
+        }
 
-                JSONObject obj = new JSONObject();
-                obj.put("id", device.getDeviceName());
-                obj.put("vid", vid);
-                obj.put("pid", pid);
-                obj.put("serial", device.getSerialNumber());
-                obj.put("product", product);
+        @Override
+        public void OnScaleDisconnected(UsbDevice device) {
+            int vid = device.getVendorId();
+            int pid = device.getProductId();
 
-                JSONObject json = new JSONObject();
-                json.put("device", obj);
-                this.getBridge().triggerWindowJSEvent("usb_scale_connected", json.toString(3));
-            } catch (JSONException e) {
-                throw new RuntimeException(e);
-            }
-        });
+            JSObject product = new JSObject();
+            product.put("manufacturer", device.getManufacturerName());
+            product.put("name", device.getProductName());
+
+            JSObject dev = new JSObject();
+            dev.put("id", device.getDeviceName());
+            dev.put("vid", vid);
+            dev.put("pid", pid);
+            dev.put("serial", device.getSerialNumber());
+            dev.put("product", product);
+
+            JSObject response = new JSObject();
+            response.put("device", dev);
+            notifyListeners("onScaleDisconnected", response);
+
+            implementation.stop();
+        }
+    };
+
+    @Override
+    public void load() {
+        super.load();
+        implementation = new USBScale(this.getActivity(), callback);
     }
+
+//    private boolean hasPausedEver = false;
+//
+//    @Override
+//    protected void handleOnPause() {
+//        hasPausedEver = true;
+//
+//    }
+//
+//    @Override
+//    protected void handleOnResume() {
+//        if (!hasPausedEver) {
+//            return;
+//        }
+//
+//    }
 
     @PluginMethod
     public void enumerateDevices(PluginCall call) throws JSONException {
@@ -109,7 +118,7 @@ public class USBScalePlugin extends Plugin {
 
     @PluginMethod
     public void requestPermission(PluginCall call) throws JSONException {
-        String device = call.getString("device");
+        String device = call.getString("device_id");
 
         if(device == null) {
             JSONArray enumerateDevices = implementation.enumerateDevices();
@@ -130,9 +139,7 @@ public class USBScalePlugin extends Plugin {
                         return;
                     }
 
-                    JSObject ret = new JSObject();
-                    ret.put("status", status);
-                    call.resolve(ret);
+                    call.resolve();
                 });
             } catch (IOException e) {
                 call.reject(e.getMessage(), e);
@@ -142,7 +149,7 @@ public class USBScalePlugin extends Plugin {
 
     @PluginMethod
     public void open(PluginCall call) throws JSONException {
-        String device = call.getString("device");
+        String device = call.getString("device_id");
 
         if(device == null) {
             JSONArray enumerateDevices = implementation.enumerateDevices();
@@ -170,39 +177,6 @@ public class USBScalePlugin extends Plugin {
     @PluginMethod()
     public void stop(PluginCall call) throws JSONException {
         implementation.stop();
-        call.resolve();
-    }
-
-    @Nullable
-    protected PluginCall getIncomingWeightDataCallback() {
-        if(incomingWeightDataCallbackId == null) {
-            return null;
-        }
-
-        return bridge.getSavedCall(incomingWeightDataCallbackId);
-    }
-
-    @PluginMethod(returnType = PluginMethod.RETURN_CALLBACK)
-    public void setIncomingWeightDataCallback(PluginCall call) {
-        if(incomingWeightDataCallbackId != null) {
-            bridge.releaseCall(incomingWeightDataCallbackId);
-            incomingWeightDataCallbackId = null;
-        }
-
-        call.setKeepAlive(true);
-        incomingWeightDataCallbackId = call.getCallbackId();
-        bridge.saveCall(call);
-    }
-
-    @PluginMethod()
-    public void clearIncomingWeightDataCallback(PluginCall call) {
-        if(incomingWeightDataCallbackId == null) {
-            return;
-        }
-
-        bridge.releaseCall(incomingWeightDataCallbackId);
-        incomingWeightDataCallbackId = null;
-
         call.resolve();
     }
 }

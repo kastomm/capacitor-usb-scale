@@ -20,12 +20,13 @@
   },
   "dependencies": {
     "@capacitor/android": "^5.0.0",
+    "@capacitor/app": "^5.0.6",
     "@capacitor/camera": "latest",
     "@capacitor/core": "latest",
     "@capacitor/ios": "^5.0.0",
     "@capacitor/splash-screen": "latest",
     "@kduma-autoid/capacitor-usb-scale": "file:..",
-    "@kduma-autoid/capacitor-webview-watchdog": "^0.0.2",
+    "@kduma-autoid/capacitor-webview-watchdog": "^0.1.0",
     "@trapezedev/configure": "^7.0.10"
   },
   "devDependencies": {

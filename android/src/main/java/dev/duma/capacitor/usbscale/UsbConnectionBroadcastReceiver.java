@@ -1,6 +1,5 @@
 package dev.duma.capacitor.usbscale;
 
-import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -8,9 +7,9 @@ import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 
 public class UsbConnectionBroadcastReceiver extends BroadcastReceiver {
-    private final UsbConnectedBroadcastReceiverCallback callback;
+    private final IUSBScaleCallback callback;
 
-    public UsbConnectionBroadcastReceiver(UsbConnectedBroadcastReceiverCallback callback) {
+    public UsbConnectionBroadcastReceiver(IUSBScaleCallback callback) {
         this.callback = callback;
     }
 
@@ -23,11 +22,7 @@ public class UsbConnectionBroadcastReceiver extends BroadcastReceiver {
                 return;
             }
 
-            callback.run(device);
+            callback.OnScaleConnected(device);
         }
-    }
-
-    public interface UsbConnectedBroadcastReceiverCallback {
-        void run(UsbDevice device);
     }
 }

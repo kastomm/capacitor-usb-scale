@@ -1,6 +1,9 @@
 import { SplashScreen } from '@capacitor/splash-screen';
 import { USBScale } from '@kduma-autoid/capacitor-usb-scale';
-import {WebViewWatchDog} from "@kduma-autoid/capacitor-webview-watchdog";
+import { WebViewWatchDog } from "@kduma-autoid/capacitor-webview-watchdog";
+
+import { ScaleStatus } from "../../../src";
+import {App} from "@capacitor/app";
 
 window.customElements.define(
   'capacitor-welcome',
@@ -79,19 +82,6 @@ window.customElements.define(
     connectedCallback() {
       const self = this;
 
-      const read_weight_callback = function(e) {
-        const output = self.shadowRoot.querySelector('#output');
-        output.innerHTML = '<b>IncomingWeightDataCallback:</b><br><pre>' + JSON.stringify(e, null, 3) + '</pre><hr>' + output.innerHTML;
-
-        if (e.status != 'Zero' && e.status != 'InMotion' && e.status != 'Stable') {
-          self.shadowRoot.querySelector('#weight').innerHTML = '~ g';
-        } else if (e.weight < 1000) {
-          self.shadowRoot.querySelector('#weight').innerHTML = e.weight + ' g';
-        } else {
-          self.shadowRoot.querySelector('#weight').innerHTML = e.weight / 1000 + ' kg';
-        }
-      };
-
       self.shadowRoot.querySelector('#enumerate').addEventListener('click', async function (e) {
         const output = self.shadowRoot.querySelector('#output');
 
@@ -116,7 +106,6 @@ window.customElements.define(
         self.shadowRoot.querySelector('#weight').innerHTML = "- g";
 
         try {
-          await USBScale.setIncomingWeightDataCallback(read_weight_callback);
           const request = await USBScale.open();
           output.innerHTML = "<b>open():</b><br><pre><code>" + JSON.stringify(request, null, 3) + "</code></pre><hr>" + output.innerHTML;
         } catch (err) {
@@ -130,33 +119,53 @@ window.customElements.define(
 
         try {
           const request = await USBScale.stop();
-          await USBScale.clearIncomingWeightDataCallback();
           output.innerHTML = "<b>stop():</b><br><pre><code>" + JSON.stringify(request, null, 3) + "</code></pre><hr>" + output.innerHTML;
         } catch (err) {
           output.innerHTML = "<b>stop() - EXCEPTION!:</b><br><pre><code>" + err.message + "</code></pre><hr>" + output.innerHTML;
         }
       });
 
-      window.addEventListener('usb_scale_read', (e) => {
+      USBScale.addListener('onRead', function(e) {
         const output = self.shadowRoot.querySelector('#output');
-        output.innerHTML = '<b>usb_scale_read:</b><br><pre>' + JSON.stringify(e, null, 3) + '</pre><hr>' + output.innerHTML;
-      }, false);
+        output.innerHTML = '<b>onRead:</b><br><pre>' + JSON.stringify(e, null, 3) + '</pre><hr>' + output.innerHTML;
 
-      window.addEventListener('usb_scale_disconnected', async (e) => {
+        if (e.status !== ScaleStatus.Zero && e.status !== ScaleStatus.InMotion && e.status !== ScaleStatus.Stable) {
+          self.shadowRoot.querySelector('#weight').innerHTML = '~ g';
+        } else if (e.weight < 1000) {
+          self.shadowRoot.querySelector('#weight').innerHTML = e.weight + ' g';
+        } else {
+          self.shadowRoot.querySelector('#weight').innerHTML = e.weight / 1000 + ' kg';
+        }
+      });
+
+      USBScale.addListener('onScaleDisconnected', function(e) {
         const output = self.shadowRoot.querySelector('#output');
-        await USBScale.clearIncomingWeightDataCallback();
-        output.innerHTML = "<b>usb_scale_disconnected:</b><br><pre>" + JSON.stringify(e, null, 3) + "</pre><hr>" + output.innerHTML;
+        output.innerHTML = "<b>onScaleDisconnected:</b><br><pre>" + JSON.stringify(e, null, 3) + "</pre><hr>" + output.innerHTML;
 
         self.shadowRoot.querySelector('#weight').innerHTML = "- g";
-      }, false);
+      });
 
-      window.addEventListener('usb_scale_connected', async (e) => {
+      USBScale.addListener('onScaleConnected', async function (e) {
         const output = self.shadowRoot.querySelector('#output');
-        output.innerHTML = "<b>usb_scale_connected:</b><br><pre>" + JSON.stringify(e, null, 3) + "</pre><hr>" + output.innerHTML;
+        output.innerHTML = "<b>onScaleConnected:</b><br><pre>" + JSON.stringify(e, null, 3) + "</pre><hr>" + output.innerHTML;
 
-        await USBScale.setIncomingWeightDataCallback(read_weight_callback);
-        const request = await USBScale.open();
-      }, false);
+
+        try {
+          const request = await USBScale.open();
+          output.innerHTML = "<b>onScaleConnected -> open():</b><br><pre><code>" + JSON.stringify(request, null, 3) + "</code></pre><hr>" + output.innerHTML;
+        } catch (err) {
+          output.innerHTML = "<b>onScaleConnected -> open() - EXCEPTION!:</b><br><pre><code>" + err.message + "</code></pre><hr>" + output.innerHTML;
+          let listener = App.addListener('resume', async () => {
+            try {
+              const request = await USBScale.open();
+              output.innerHTML = "<b>onScaleConnected -> resume -> open():</b><br><pre><code>" + JSON.stringify(request, null, 3) + "</code></pre><hr>" + output.innerHTML;
+            } catch (err) {
+              output.innerHTML = "<b>onScaleConnected -> resume -> open() - EXCEPTION!:</b><br><pre><code>" + err.message + "</code></pre><hr>" + output.innerHTML;
+            }
+            await listener.remove();
+          });
+        }
+      });
     }
   }
 );

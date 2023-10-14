@@ -1,9 +1,12 @@
 import { WebPlugin } from '@capacitor/core';
 
-import type { CallbackID, USBScalePlugin } from './definitions';
+import type {
+  EnumerateDevicesResponse,
+  USBScalePlugin
+} from './definitions';
 
 export class USBScaleWeb extends WebPlugin implements USBScalePlugin {
-  enumerateDevices(): Promise<{ devices: { id: string; vid: number; pid: number; serial?: string; product: { manufacturer: string; name: string } }[] }> {
+  enumerateDevices(): Promise<EnumerateDevicesResponse> {
     throw this.unimplemented('Not implemented on web.');
   }
 
@@ -11,19 +14,11 @@ export class USBScaleWeb extends WebPlugin implements USBScalePlugin {
     throw this.unimplemented('Not implemented on web.');
   }
 
-  requestPermission(): Promise<{ status: boolean }> {
+  requestPermission(): Promise<void> {
     throw this.unimplemented('Not implemented on web.');
   }
 
   stop(): Promise<void> {
-    throw this.unimplemented('Not implemented on web.');
-  }
-
-  clearIncomingWeightDataCallback(): Promise<void> {
-    throw this.unimplemented('Not implemented on web.');
-  }
-
-  setIncomingWeightDataCallback(): Promise<CallbackID> {
     throw this.unimplemented('Not implemented on web.');
   }
 }
