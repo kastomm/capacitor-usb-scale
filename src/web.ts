@@ -4,6 +4,7 @@ import type {
   EnumerateDevicesResponse,
   USBScalePlugin
 } from './definitions';
+import {HasPermissionResponse} from "./definitions";
 
 export class USBScaleWeb extends WebPlugin implements USBScalePlugin {
   enumerateDevices(): Promise<EnumerateDevicesResponse> {
@@ -15,6 +16,10 @@ export class USBScaleWeb extends WebPlugin implements USBScalePlugin {
   }
 
   requestPermission(): Promise<void> {
+    throw this.unimplemented('Not implemented on web.');
+  }
+
+  hasPermission(): Promise<HasPermissionResponse> {
     throw this.unimplemented('Not implemented on web.');
   }
 

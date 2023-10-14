@@ -13,6 +13,20 @@ export interface RequestPermissionOptions {
   device_id: string;
 }
 
+export interface HasPermissionOptions {
+  /**
+   * The device to check permission for. If not specified, the first device will be used.
+   */
+  device_id: string;
+}
+
+export interface HasPermissionResponse {
+  /**
+   * Whether the app has permission to access the USB scale device
+   */
+  permission: boolean;
+}
+
 export interface OpenOptions {
   /**
    * The device to open. If not specified, the first device will be used.
@@ -66,6 +80,11 @@ export interface USBScalePlugin {
    * Throws an error if permission is denied
    */
   requestPermission(options?: RequestPermissionOptions): Promise<void>;
+
+  /**
+   * Check if app has permission to access the USB scale device
+   */
+  hasPermission(options?: HasPermissionOptions): Promise<HasPermissionResponse>;
 
   /**
    * Open the USB scale device for data reading

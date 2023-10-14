@@ -15,6 +15,7 @@ npx cap sync
 
 * [`enumerateDevices()`](#enumeratedevices)
 * [`requestPermission(...)`](#requestpermission)
+* [`hasPermission(...)`](#haspermission)
 * [`open(...)`](#open)
 * [`close()`](#close)
 * [`addListener('onRead', ...)`](#addlisteneronread)
@@ -55,6 +56,23 @@ Throws an error if permission is denied
 | Param         | Type                                                                          |
 | ------------- | ----------------------------------------------------------------------------- |
 | **`options`** | <code><a href="#requestpermissionoptions">RequestPermissionOptions</a></code> |
+
+--------------------
+
+
+### hasPermission(...)
+
+```typescript
+hasPermission(options?: HasPermissionOptions | undefined) => Promise<HasPermissionResponse>
+```
+
+Check if app has permission to access the USB scale device
+
+| Param         | Type                                                                  |
+| ------------- | --------------------------------------------------------------------- |
+| **`options`** | <code><a href="#haspermissionoptions">HasPermissionOptions</a></code> |
+
+**Returns:** <code>Promise&lt;<a href="#haspermissionresponse">HasPermissionResponse</a>&gt;</code>
 
 --------------------
 
@@ -178,6 +196,20 @@ Removes all listeners
 | Prop            | Type                | Description                                                                            |
 | --------------- | ------------------- | -------------------------------------------------------------------------------------- |
 | **`device_id`** | <code>string</code> | The device to request permission for. If not specified, the first device will be used. |
+
+
+#### HasPermissionResponse
+
+| Prop             | Type                 | Description                                                   |
+| ---------------- | -------------------- | ------------------------------------------------------------- |
+| **`permission`** | <code>boolean</code> | Whether the app has permission to access the USB scale device |
+
+
+#### HasPermissionOptions
+
+| Prop            | Type                | Description                                                                          |
+| --------------- | ------------------- | ------------------------------------------------------------------------------------ |
+| **`device_id`** | <code>string</code> | The device to check permission for. If not specified, the first device will be used. |
 
 
 #### OpenOptions

@@ -69,6 +69,7 @@ window.customElements.define(
         <p>
           <button class="button" id="enumerate">enumerateDevices()</button>
           <button class="button" id="request">requestPermission()</button>
+          <button class="button" id="has">hasPermission()</button>
           <button class="button" id="open">open()</button>
           <button class="button" id="close">close()</button>
         </p>
@@ -98,6 +99,17 @@ window.customElements.define(
           output.innerHTML = "<b>requestPermission():</b><br><pre><code>" + JSON.stringify(request, null, 3) + "</code></pre><hr>" + output.innerHTML;
         } catch (err) {
           output.innerHTML = "<b>requestPermission() - EXCEPTION!:</b><br><pre><code>" + err.message + "</code></pre><hr>" + output.innerHTML;
+        }
+      });
+
+      self.shadowRoot.querySelector('#has').addEventListener('click', async function (e) {
+        const output = self.shadowRoot.querySelector('#output');
+
+        try {
+          const request = await USBScale.hasPermission();
+          output.innerHTML = "<b>hasPermission():</b><br><pre><code>" + JSON.stringify(request, null, 3) + "</code></pre><hr>" + output.innerHTML;
+        } catch (err) {
+          output.innerHTML = "<b>hasPermission() - EXCEPTION!:</b><br><pre><code>" + err.message + "</code></pre><hr>" + output.innerHTML;
         }
       });
 
@@ -149,22 +161,32 @@ window.customElements.define(
         const output = self.shadowRoot.querySelector('#output');
         output.innerHTML = "<b>onScaleConnected:</b><br><pre>" + JSON.stringify(e, null, 3) + "</pre><hr>" + output.innerHTML;
 
+        let p = await USBScale.hasPermission();
+        if(p.permission) {
+          try {
+            const request = await USBScale.open();
+            output.innerHTML = "<b>onScaleConnected -> open():</b><br><pre><code>" + JSON.stringify(request, null, 3) + "</code></pre><hr>" + output.innerHTML;
+          } catch (err) {
+            output.innerHTML = "<b>onScaleConnected -> open() - EXCEPTION!:</b><br><pre><code>" + err.message + "</code></pre><hr>" + output.innerHTML;
+          }
+          return;
+        }
 
-        try {
-          const request = await USBScale.open();
-          output.innerHTML = "<b>onScaleConnected -> open():</b><br><pre><code>" + JSON.stringify(request, null, 3) + "</code></pre><hr>" + output.innerHTML;
-        } catch (err) {
-          output.innerHTML = "<b>onScaleConnected -> open() - EXCEPTION!:</b><br><pre><code>" + err.message + "</code></pre><hr>" + output.innerHTML;
-          let listener = App.addListener('resume', async () => {
+        let listener = App.addListener('resume', async () => {
+          await listener.remove();
+
+          let p = await USBScale.hasPermission();
+          if(p.permission) {
             try {
               const request = await USBScale.open();
               output.innerHTML = "<b>onScaleConnected -> resume -> open():</b><br><pre><code>" + JSON.stringify(request, null, 3) + "</code></pre><hr>" + output.innerHTML;
             } catch (err) {
               output.innerHTML = "<b>onScaleConnected -> resume -> open() - EXCEPTION!:</b><br><pre><code>" + err.message + "</code></pre><hr>" + output.innerHTML;
             }
-            await listener.remove();
-          });
-        }
+          } else {
+            output.innerHTML = "<b>onScaleConnected -> resume:</b><br><pre><code>No permissions given.</code></pre><hr>" + output.innerHTML;
+          }
+        });
       });
     }
   }

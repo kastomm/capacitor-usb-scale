@@ -146,6 +146,26 @@ public class USBScalePlugin extends Plugin {
     }
 
     @PluginMethod
+    public void hasPermission(PluginCall call) {
+        try {
+            String device = getDeviceOrDefault(call.getString("device_id"));
+
+            this.execute(() -> {
+                try {
+                    JSObject response = new JSObject();
+                    response.put("permission", implementation.hasPermission(device));
+
+                    call.resolve(response);
+                } catch (DeviceNotFoundException e) {
+                    call.reject(e.getMessage());
+                }
+            });
+        } catch (NoConnectedUSBScaleException e) {
+            call.reject(e.getMessage());
+        }
+    }
+
+    @PluginMethod
     public void open(PluginCall call) {
         try {
             String device = getDeviceOrDefault(call.getString("device_id"));

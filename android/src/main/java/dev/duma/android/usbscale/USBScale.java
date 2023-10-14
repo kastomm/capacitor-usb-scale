@@ -57,6 +57,13 @@ public class USBScale implements IUSBScale {
         usbManager.requestPermission(usbDevice, mPermissionIntent);
     }
 
+    @Override
+    public boolean hasPermission(String device_id) throws DeviceNotFoundException {
+        UsbDevice usbDevice = getUsbDeviceFromId(device_id);
+
+        return usbManager.hasPermission(usbDevice);
+    }
+
     @NonNull
     @Override
     public UsbDevice open(String device_id) throws DeviceNotFoundException, CantOpenDeviceException, OpenedDeviceEndpointIsNotInputEndpoint {

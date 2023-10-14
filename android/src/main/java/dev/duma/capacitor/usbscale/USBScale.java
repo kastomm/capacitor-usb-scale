@@ -63,6 +63,10 @@ public class USBScale {
         usbScale.requestPermission(device, callback);
     }
 
+    public boolean hasPermission(String device) throws DeviceNotFoundException {
+        return usbScale.hasPermission(device);
+    }
+
     public void open(String device) throws DeviceNotFoundException, CantOpenDeviceException, OpenedDeviceEndpointIsNotInputEndpoint {
         UsbDevice usbDevice = usbScale.open(device);
         broadcastReceiver.setCurrentlyOpenedDevice(usbDevice);
