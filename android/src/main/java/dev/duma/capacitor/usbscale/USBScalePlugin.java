@@ -2,9 +2,8 @@ package dev.duma.capacitor.usbscale;
 
 import android.hardware.usb.UsbDevice;
 
-import androidx.annotation.Nullable;
+import androidx.annotation.NonNull;
 
-import com.getcapacitor.Bridge;
 import com.getcapacitor.JSObject;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
@@ -15,17 +14,23 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
+
+import dev.duma.android.usbscale.DeviceInfo;
+import dev.duma.android.usbscale.exceptions.CantOpenDeviceException;
+import dev.duma.android.usbscale.exceptions.DeviceNotFoundException;
+import dev.duma.android.usbscale.exceptions.OpenedDeviceEndpointIsNotInputEndpoint;
 
 @CapacitorPlugin(name = "USBScale")
 public class USBScalePlugin extends Plugin {
     private USBScale implementation;
 
-    AtomicReference<Double> lastWeight = new AtomicReference<>((double) 0);
-    AtomicReference<String> lastStatus = new AtomicReference<>("");
-    IUSBScaleCallback callback = new IUSBScaleCallback() {
+    final AtomicReference<Double> lastWeight = new AtomicReference<>((double) 0);
+    final AtomicReference<String> lastStatus = new AtomicReference<>("");
+
+    final IUSBScaleCallback callback = new IUSBScaleCallback() {
         @Override
         public void OnRead(String data, String status, double weight) {
             if(weight == lastWeight.get() && Objects.equals(status, lastStatus.get()))
@@ -44,43 +49,39 @@ public class USBScalePlugin extends Plugin {
 
         @Override
         public void OnScaleConnected(UsbDevice device) {
-            int vid = device.getVendorId();
-            int pid = device.getProductId();
-
             JSObject product = new JSObject();
             product.put("manufacturer", device.getManufacturerName());
             product.put("name", device.getProductName());
 
             JSObject dev = new JSObject();
             dev.put("id", device.getDeviceName());
-            dev.put("vid", vid);
-            dev.put("pid", pid);
+            dev.put("vid", device.getVendorId());
+            dev.put("pid", device.getProductId());
             dev.put("serial", device.getSerialNumber());
             dev.put("product", product);
 
             JSObject response = new JSObject();
             response.put("device", dev);
+
             notifyListeners("onScaleConnected", response);
         }
 
         @Override
         public void OnScaleDisconnected(UsbDevice device) {
-            int vid = device.getVendorId();
-            int pid = device.getProductId();
-
             JSObject product = new JSObject();
             product.put("manufacturer", device.getManufacturerName());
             product.put("name", device.getProductName());
 
             JSObject dev = new JSObject();
             dev.put("id", device.getDeviceName());
-            dev.put("vid", vid);
-            dev.put("pid", pid);
+            dev.put("vid", device.getVendorId());
+            dev.put("pid", device.getProductId());
             dev.put("serial", device.getSerialNumber());
             dev.put("product", product);
 
             JSObject response = new JSObject();
             response.put("device", dev);
+
             notifyListeners("onScaleDisconnected", response);
 
             implementation.stop();
@@ -89,8 +90,8 @@ public class USBScalePlugin extends Plugin {
 
     @Override
     public void load() {
-        super.load();
         implementation = new USBScale(this.getActivity(), callback);
+        implementation.register();
     }
 
 //    private boolean hasPausedEver = false;
@@ -111,29 +112,36 @@ public class USBScalePlugin extends Plugin {
 
     @PluginMethod
     public void enumerateDevices(PluginCall call) throws JSONException {
+        JSONArray devicesArray = new JSONArray();
+
+        for (DeviceInfo device : implementation.enumerateDevices()) {
+            JSONObject product = new JSONObject();
+            product.put("manufacturer", device.getManufacturer());
+            product.put("name", device.getName());
+
+            JSONObject obj = new JSONObject();
+            obj.put("id", device.getId());
+            obj.put("vid", device.getVid());
+            obj.put("pid", device.getPid());
+            obj.put("serial", device.getSerial());
+            obj.put("product", product);
+
+            devicesArray.put(obj);
+        }
+
         JSObject ret = new JSObject();
-        ret.put("devices", implementation.enumerateDevices());
+        ret.put("devices", devicesArray);
+
         call.resolve(ret);
     }
 
     @PluginMethod
-    public void requestPermission(PluginCall call) throws JSONException {
-        String device = call.getString("device_id");
+    public void requestPermission(PluginCall call) {
+        String device = getDeviceOrDefault(call.getString("device_id"));
 
-        if(device == null) {
-            JSONArray enumerateDevices = implementation.enumerateDevices();
-            if(enumerateDevices.length() == 0){
-                call.reject("No USB Scale found!");
-                return;
-            }
-            JSONObject d = (JSONObject) enumerateDevices.get(0);
-            device = d.getString("id");
-        }
-
-        String finalDevice = device;
         this.execute(() -> {
             try {
-                implementation.requestPermission(finalDevice, status -> {
+                implementation.requestPermission(device, status -> {
                     if(!status){
                         call.reject("Permission denied!");
                         return;
@@ -141,42 +149,46 @@ public class USBScalePlugin extends Plugin {
 
                     call.resolve();
                 });
-            } catch (IOException e) {
-                call.reject(e.getMessage(), e);
+            } catch (DeviceNotFoundException e) {
+                call.reject(e.getMessage());
             }
         });
     }
 
     @PluginMethod
-    public void open(PluginCall call) throws JSONException {
-        String device = call.getString("device_id");
+    public void open(PluginCall call) {
+        String device = getDeviceOrDefault(call.getString("device_id"));
 
-        if(device == null) {
-            JSONArray enumerateDevices = implementation.enumerateDevices();
-            if(enumerateDevices.length() == 0){
-                call.reject("No USB Scale found!");
-                return;
-            }
-            JSONObject d = (JSONObject) enumerateDevices.get(0);
-            device = d.getString("id");
-        }
+        lastWeight.set((double) 0);
+        lastStatus.set("");
 
-        String finalDevice = device;
-        lastWeight = new AtomicReference<>((double) 0);
-        lastStatus = new AtomicReference<>("");
         this.execute(() -> {
             try {
-                implementation.open(finalDevice);
+                implementation.open(device);
                 call.resolve();
-            } catch (IOException e) {
-                call.reject(e.getMessage(), e);
+            } catch (DeviceNotFoundException | CantOpenDeviceException | OpenedDeviceEndpointIsNotInputEndpoint e) {
+                call.reject(e.getMessage());
             }
         });
     }
 
     @PluginMethod()
-    public void stop(PluginCall call) throws JSONException {
+    public void stop(PluginCall call) {
         implementation.stop();
         call.resolve();
+    }
+
+    @NonNull
+    private String getDeviceOrDefault(String device) {
+        if(device != null) {
+            return device;
+        }
+
+        ArrayList<DeviceInfo> enumerateDevices = implementation.enumerateDevices();
+        if(enumerateDevices.size() == 0){
+            throw new RuntimeException("No connected USB Scale found!");
+        }
+
+        return enumerateDevices.get(0).getId();
     }
 }

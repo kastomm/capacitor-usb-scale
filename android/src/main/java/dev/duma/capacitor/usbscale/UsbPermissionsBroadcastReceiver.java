@@ -9,11 +9,11 @@ import android.hardware.usb.UsbManager;
 public class UsbPermissionsBroadcastReceiver extends BroadcastReceiver {
     public static final String USB_PERMISSION ="dev.duma.capacitor.usbscale.USB_PERMISSION";
     private final UsbPermissionsBroadcastReceiverCallback callback;
-    private final Activity activity;
+    private final Context activity;
 
-    public UsbPermissionsBroadcastReceiver(UsbPermissionsBroadcastReceiverCallback callback, Activity activity) {
+    public UsbPermissionsBroadcastReceiver(UsbPermissionsBroadcastReceiverCallback callback, Context context) {
         this.callback = callback;
-        this.activity = activity;
+        this.activity = context;
     }
 
     @Override
