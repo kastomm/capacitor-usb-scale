@@ -22,6 +22,7 @@ import dev.duma.android.usbscale.DeviceInfo;
 import dev.duma.android.usbscale.exceptions.CantOpenDeviceException;
 import dev.duma.android.usbscale.exceptions.DeviceNotFoundException;
 import dev.duma.android.usbscale.exceptions.OpenedDeviceEndpointIsNotInputEndpoint;
+import dev.duma.capacitor.usbscale.exceptions.NoConnectedUSBScaleException;
 
 @CapacitorPlugin(name = "USBScale")
 public class USBScalePlugin extends Plugin {
@@ -137,39 +138,47 @@ public class USBScalePlugin extends Plugin {
 
     @PluginMethod
     public void requestPermission(PluginCall call) {
-        String device = getDeviceOrDefault(call.getString("device_id"));
+        try {
+            String device = getDeviceOrDefault(call.getString("device_id"));
 
-        this.execute(() -> {
-            try {
-                implementation.requestPermission(device, status -> {
-                    if(!status){
-                        call.reject("Permission denied!");
-                        return;
-                    }
+            this.execute(() -> {
+                try {
+                    implementation.requestPermission(device, status -> {
+                        if(!status){
+                            call.reject("Permission denied!");
+                            return;
+                        }
 
-                    call.resolve();
-                });
-            } catch (DeviceNotFoundException e) {
-                call.reject(e.getMessage());
-            }
-        });
+                        call.resolve();
+                    });
+                } catch (DeviceNotFoundException e) {
+                    call.reject(e.getMessage());
+                }
+            });
+        } catch (NoConnectedUSBScaleException e) {
+            call.reject(e.getMessage());
+        }
     }
 
     @PluginMethod
     public void open(PluginCall call) {
-        String device = getDeviceOrDefault(call.getString("device_id"));
+        try {
+            String device = getDeviceOrDefault(call.getString("device_id"));
 
-        lastWeight.set((double) 0);
-        lastStatus.set("");
+            lastWeight.set((double) 0);
+            lastStatus.set("");
 
-        this.execute(() -> {
-            try {
-                implementation.open(device);
-                call.resolve();
-            } catch (DeviceNotFoundException | CantOpenDeviceException | OpenedDeviceEndpointIsNotInputEndpoint e) {
-                call.reject(e.getMessage());
-            }
-        });
+            this.execute(() -> {
+                try {
+                    implementation.open(device);
+                    call.resolve();
+                } catch (DeviceNotFoundException | CantOpenDeviceException | OpenedDeviceEndpointIsNotInputEndpoint e) {
+                    call.reject(e.getMessage());
+                }
+            });
+        } catch (NoConnectedUSBScaleException e) {
+            call.reject(e.getMessage());
+        }
     }
 
     @PluginMethod()
@@ -179,14 +188,14 @@ public class USBScalePlugin extends Plugin {
     }
 
     @NonNull
-    private String getDeviceOrDefault(String device) {
+    private String getDeviceOrDefault(String device) throws NoConnectedUSBScaleException {
         if(device != null) {
             return device;
         }
 
         ArrayList<DeviceInfo> enumerateDevices = implementation.enumerateDevices();
         if(enumerateDevices.size() == 0){
-            throw new RuntimeException("No connected USB Scale found!");
+            throw new NoConnectedUSBScaleException();
         }
 
         return enumerateDevices.get(0).getId();

@@ -16,7 +16,7 @@ public interface IUSBScale {
     @NonNull
     ArrayList<DeviceInfo> enumerateDevices();
 
-    void requestPermission(String device, UsbPermissionsBroadcastReceiver.UsbPermissionsBroadcastReceiverCallback callback) throws DeviceNotFoundException;
+    void requestPermission(String device, UsbPermissionsBroadcastReceiver.Callback callback) throws DeviceNotFoundException;
 
     @NonNull
     UsbDevice open(String device) throws DeviceNotFoundException, CantOpenDeviceException, OpenedDeviceEndpointIsNotInputEndpoint;

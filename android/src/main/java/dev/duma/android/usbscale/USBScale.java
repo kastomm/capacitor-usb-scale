@@ -1,10 +1,7 @@
 package dev.duma.android.usbscale;
 
-import android.annotation.SuppressLint;
 import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
@@ -52,14 +49,11 @@ public class USBScale implements IUSBScale {
         return deviceList;
     }
 
-    @SuppressLint("UnspecifiedRegisterReceiverFlag")
-    public void requestPermission(String device_id, UsbPermissionsBroadcastReceiver.UsbPermissionsBroadcastReceiverCallback callback) throws DeviceNotFoundException {
+    public void requestPermission(String device_id, UsbPermissionsBroadcastReceiver.Callback callback) throws DeviceNotFoundException {
         UsbDevice usbDevice = getUsbDeviceFromId(device_id);
 
-        PendingIntent mPermissionIntent = PendingIntent.getBroadcast(context, 0, new Intent(UsbPermissionsBroadcastReceiver.USB_PERMISSION), 0);
-        IntentFilter filter = new IntentFilter(UsbPermissionsBroadcastReceiver.USB_PERMISSION);
         UsbPermissionsBroadcastReceiver usbReceiver = new UsbPermissionsBroadcastReceiver(callback, context);
-        context.registerReceiver(usbReceiver, filter);
+        PendingIntent mPermissionIntent = usbReceiver.register();
 
         usbManager.requestPermission(usbDevice, mPermissionIntent);
     }
