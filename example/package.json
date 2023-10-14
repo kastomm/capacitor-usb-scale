@@ -1,6 +1,6 @@
 {
   "name": "capacitor-app",
-  "version": "0.1.4",
+  "version": "1.0.0",
   "description": "USB Scale plugin for Capacitor.js",
   "main": "index.js",
   "keywords": [
