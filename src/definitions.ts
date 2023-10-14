@@ -34,17 +34,17 @@ export interface OpenOptions {
   device_id: string;
 }
 
-interface OnReadEvent {
+export interface OnReadEvent {
   data: number[];
   weight: number;
   status: ScaleStatus;
 }
 
-interface OnScaleConnectedEvent {
+export interface OnScaleConnectedEvent {
   device: USBDevice;
 }
 
-interface OnScaleDisconnectedEvent {
+export interface OnScaleDisconnectedEvent {
   device: USBDevice;
 }
 
