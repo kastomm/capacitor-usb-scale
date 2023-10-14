@@ -43,15 +43,15 @@ export interface USBDevice {
 }
 
 export enum ScaleStatus {
-  Fault = "Fault",
-  Zero = "Zero",
-  InMotion = "InMotion",
-  Stable = "Stable",
-  UnderZero = "UnderZero",
-  OverWeight = "OverWeight",
-  NeedCalibration = "NeedCalibration",
-  NeedZeroing = "NeedZeroing",
-  Unknown = "Unknown",
+  Fault = "fault",
+  Zero = "zero",
+  InMotion = "in-motion",
+  Stable = "stable",
+  UnderZero = "under-zero",
+  OverWeight = "over-weight",
+  NeedCalibration = "need-calibration",
+  NeedZeroing = "need-zeroing",
+  Unknown = "unknown",
 }
 
 export interface USBScalePlugin {

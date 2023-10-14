@@ -19,6 +19,7 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
 import dev.duma.android.usbscale.DeviceInfo;
+import dev.duma.android.usbscale.enums.StatusEnum;
 import dev.duma.android.usbscale.exceptions.CantOpenDeviceException;
 import dev.duma.android.usbscale.exceptions.DeviceNotFoundException;
 import dev.duma.android.usbscale.exceptions.OpenedDeviceEndpointIsNotInputEndpoint;
@@ -29,11 +30,11 @@ public class USBScalePlugin extends Plugin {
     private USBScale implementation;
 
     final AtomicReference<Double> lastWeight = new AtomicReference<>((double) 0);
-    final AtomicReference<String> lastStatus = new AtomicReference<>("");
+    final AtomicReference<StatusEnum> lastStatus = new AtomicReference<>(null);
 
     final IUSBScaleCallback callback = new IUSBScaleCallback() {
         @Override
-        public void OnRead(String data, String status, double weight) {
+        public void OnRead(String data, StatusEnum status, double weight) {
             if(weight == lastWeight.get() && Objects.equals(status, lastStatus.get()))
                 return;
 
@@ -43,7 +44,7 @@ public class USBScalePlugin extends Plugin {
             JSObject ret = new JSObject();
             ret.put("data", data);
             ret.put("weight", weight);
-            ret.put("status", status);
+            ret.put("status", status.getName());
 
             notifyListeners("onRead", ret);
         }
@@ -166,7 +167,7 @@ public class USBScalePlugin extends Plugin {
             String device = getDeviceOrDefault(call.getString("device_id"));
 
             lastWeight.set((double) 0);
-            lastStatus.set("");
+            lastStatus.set(null);
 
             this.execute(() -> {
                 try {

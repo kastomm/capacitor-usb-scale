@@ -9,6 +9,7 @@ import android.util.Log;
 
 import java.util.Arrays;
 
+import dev.duma.android.usbscale.enums.StatusEnum;
 import dev.duma.android.usbscale.exceptions.OpenedDeviceEndpointIsNotInputEndpoint;
 
 public class ConnectedUSBScaleReader {
@@ -84,16 +85,16 @@ public class ConnectedUSBScaleReader {
                         if (buffer[0] != 3)
                             continue;
 
-                        String stringStatus = switch (buffer[1]) {
-                            case 1 -> "Fault";
-                            case 2 -> "Zero";
-                            case 3 -> "InMotion";
-                            case 4 -> "Stable";
-                            case 5 -> "UnderZero";
-                            case 6 -> "OverWeight";
-                            case 7 -> "NeedCalibration";
-                            case 8 -> "NeedZeroing";
-                            default -> "Unknown";
+                        StatusEnum stringStatus = switch (buffer[1]) {
+                            case 1 -> StatusEnum.Fault;
+                            case 2 -> StatusEnum.Zero;
+                            case 3 -> StatusEnum.InMotion;
+                            case 4 -> StatusEnum.Stable;
+                            case 5 -> StatusEnum.UnderZero;
+                            case 6 -> StatusEnum.OverWeight;
+                            case 7 -> StatusEnum.NeedCalibration;
+                            case 8 -> StatusEnum.NeedZeroing;
+                            default -> StatusEnum.Unknown;
                         };
 
                         double weight = (Byte.toUnsignedInt(buffer[4]) + Byte.toUnsignedInt(buffer[5]) * 256) * Math.pow(10, buffer[3]);

@@ -222,17 +222,17 @@ Removes all listeners
 
 #### ScaleStatus
 
-| Members               | Value                          |
-| --------------------- | ------------------------------ |
-| **`Fault`**           | <code>"Fault"</code>           |
-| **`Zero`**            | <code>"Zero"</code>            |
-| **`InMotion`**        | <code>"InMotion"</code>        |
-| **`Stable`**          | <code>"Stable"</code>          |
-| **`UnderZero`**       | <code>"UnderZero"</code>       |
-| **`OverWeight`**      | <code>"OverWeight"</code>      |
-| **`NeedCalibration`** | <code>"NeedCalibration"</code> |
-| **`NeedZeroing`**     | <code>"NeedZeroing"</code>     |
-| **`Unknown`**         | <code>"Unknown"</code>         |
+| Members               | Value                           |
+| --------------------- | ------------------------------- |
+| **`Fault`**           | <code>"fault"</code>            |
+| **`Zero`**            | <code>"zero"</code>             |
+| **`InMotion`**        | <code>"in-motion"</code>        |
+| **`Stable`**          | <code>"stable"</code>           |
+| **`UnderZero`**       | <code>"under-zero"</code>       |
+| **`OverWeight`**      | <code>"over-weight"</code>      |
+| **`NeedCalibration`** | <code>"need-calibration"</code> |
+| **`NeedZeroing`**     | <code>"need-zeroing"</code>     |
+| **`Unknown`**         | <code>"unknown"</code>          |
 
 </docgen-api>
 

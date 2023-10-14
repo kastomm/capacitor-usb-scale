@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 
 import java.util.ArrayList;
 
+import dev.duma.android.usbscale.enums.StatusEnum;
 import dev.duma.android.usbscale.exceptions.CantOpenDeviceException;
 import dev.duma.android.usbscale.exceptions.DeviceNotFoundException;
 import dev.duma.android.usbscale.exceptions.OpenedDeviceEndpointIsNotInputEndpoint;
@@ -30,6 +31,6 @@ public interface IUSBScale {
     }
 
     interface Callback {
-        void OnRead(String data, String status, double weight);
+        void OnRead(String data, StatusEnum status, double weight);
     }
 }
