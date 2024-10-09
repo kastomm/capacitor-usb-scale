@@ -104,7 +104,7 @@ export interface USBScalePlugin {
   addListener(
       eventName: 'onRead',
       listenerFunc: (event: OnReadEvent) => void,
-  ): Promise<PluginListenerHandle> & PluginListenerHandle;
+  ): Promise<PluginListenerHandle>;
 
   /**
    * Event emitted when a compatible USB scale device is connected.
@@ -112,7 +112,7 @@ export interface USBScalePlugin {
   addListener(
       eventName: 'onScaleConnected',
       listenerFunc: (event: OnScaleConnectedEvent) => void,
-  ): Promise<PluginListenerHandle> & PluginListenerHandle;
+  ): Promise<PluginListenerHandle>;
 
   /**
    * Event emitted when a compatible USB scale device is disconnected.
@@ -120,7 +120,7 @@ export interface USBScalePlugin {
   addListener(
       eventName: 'onScaleDisconnected',
       listenerFunc: (event: OnScaleDisconnectedEvent) => void,
-  ): Promise<PluginListenerHandle> & PluginListenerHandle;
+  ): Promise<PluginListenerHandle>;
 
   /**
    * Removes all listeners

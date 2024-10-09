@@ -108,7 +108,7 @@ Close the USB scale device
 ### addListener('onRead', ...)
 
 ```typescript
-addListener(eventName: 'onRead', listenerFunc: (event: OnReadEvent) => void) => Promise<PluginListenerHandle> & PluginListenerHandle
+addListener(eventName: 'onRead', listenerFunc: (event: OnReadEvent) => void) => Promise<PluginListenerHandle>
 ```
 
 Event emitted when the scale sends data
@@ -118,7 +118,7 @@ Event emitted when the scale sends data
 | **`eventName`**    | <code>'onRead'</code>                                                   |
 | **`listenerFunc`** | <code>(event: <a href="#onreadevent">OnReadEvent</a>) =&gt; void</code> |
 
-**Returns:** <code>Promise&lt;<a href="#pluginlistenerhandle">PluginListenerHandle</a>&gt; & <a href="#pluginlistenerhandle">PluginListenerHandle</a></code>
+**Returns:** <code>Promise&lt;<a href="#pluginlistenerhandle">PluginListenerHandle</a>&gt;</code>
 
 --------------------
 
@@ -126,7 +126,7 @@ Event emitted when the scale sends data
 ### addListener('onScaleConnected', ...)
 
 ```typescript
-addListener(eventName: 'onScaleConnected', listenerFunc: (event: OnScaleConnectedEvent) => void) => Promise<PluginListenerHandle> & PluginListenerHandle
+addListener(eventName: 'onScaleConnected', listenerFunc: (event: OnScaleConnectedEvent) => void) => Promise<PluginListenerHandle>
 ```
 
 Event emitted when a compatible USB scale device is connected.
@@ -136,7 +136,7 @@ Event emitted when a compatible USB scale device is connected.
 | **`eventName`**    | <code>'onScaleConnected'</code>                                                             |
 | **`listenerFunc`** | <code>(event: <a href="#onscaleconnectedevent">OnScaleConnectedEvent</a>) =&gt; void</code> |
 
-**Returns:** <code>Promise&lt;<a href="#pluginlistenerhandle">PluginListenerHandle</a>&gt; & <a href="#pluginlistenerhandle">PluginListenerHandle</a></code>
+**Returns:** <code>Promise&lt;<a href="#pluginlistenerhandle">PluginListenerHandle</a>&gt;</code>
 
 --------------------
 
@@ -144,7 +144,7 @@ Event emitted when a compatible USB scale device is connected.
 ### addListener('onScaleDisconnected', ...)
 
 ```typescript
-addListener(eventName: 'onScaleDisconnected', listenerFunc: (event: OnScaleDisconnectedEvent) => void) => Promise<PluginListenerHandle> & PluginListenerHandle
+addListener(eventName: 'onScaleDisconnected', listenerFunc: (event: OnScaleDisconnectedEvent) => void) => Promise<PluginListenerHandle>
 ```
 
 Event emitted when a compatible USB scale device is disconnected.
@@ -154,7 +154,7 @@ Event emitted when a compatible USB scale device is disconnected.
 | **`eventName`**    | <code>'onScaleDisconnected'</code>                                                                |
 | **`listenerFunc`** | <code>(event: <a href="#onscaledisconnectedevent">OnScaleDisconnectedEvent</a>) =&gt; void</code> |
 
-**Returns:** <code>Promise&lt;<a href="#pluginlistenerhandle">PluginListenerHandle</a>&gt; & <a href="#pluginlistenerhandle">PluginListenerHandle</a></code>
+**Returns:** <code>Promise&lt;<a href="#pluginlistenerhandle">PluginListenerHandle</a>&gt;</code>
 
 --------------------
 
